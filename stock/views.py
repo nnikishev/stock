@@ -80,14 +80,14 @@ class CarouselAPI(CRUDManager):
     
     @router.put("/carousel-item/{uuid}/upload-image/", tags=["carousel"], response_model=CarouselItemFull)
     async def upload_image(self, uuid, file: UploadFile):
-        async with aiofiles.open(f"static/{file.filename}", 'wb+') as out_file:
+        async with aiofiles.open(f"static/carousel-images/{file.filename}", 'wb+') as out_file:
             content = await file.read() 
             await out_file.write(content)
 
         async with asession.begin() as session:
             stmt = (update(self.model)
                     .where(self.model.uuid==uuid)
-                    .values(image=f"http://localhost:8000/static/{file.filename}"))
+                    .values(image=f"http://localhost:8000/static/carousel-images/{file.filename}"))
             await session.execute(stmt)
             stmt = select(self.model).where(self.model.uuid==uuid)
             query_result = await session.execute(stmt)
