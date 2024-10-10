@@ -124,7 +124,7 @@ class SettingsAPI(CRUDManager):
     async def get(self, uuid):
         return await super().get(uuid)
     
-    @router.get("/settings/get_by_name/{name}", tags=["settings"], response_model=SettingFull)
+    @router.get("/settings/get_by_name/{name}/", tags=["settings"], response_model=SettingFull)
     async def get_by_name(self, name):
         async with asession.begin() as session:
             stmt = select(self.model).where(self.model.name==name)
