@@ -6,11 +6,13 @@ from stock.exceptions import Unauthorized
 import logging
 import aiofiles
 
-from stock.models import CarouselItem
+from stock.models import CarouselItem, Settings
 from stock.database import asession, engine
 from stock.schemas import (
     CarouselItemBase,
     CarouselItemFull,
+    SettingBase,
+    SettingFull,
 )
 from sqlalchemy import select, update, delete
 
@@ -58,6 +60,13 @@ class CRUDManager:
             # await session.refresh(new)
         return new
     
+    async def get(self, uuid):
+        async with asession.begin() as session:
+            stmt = select(self.model).where(self.model.uuid==uuid)
+            query_result = await session.execute(stmt)
+            instance = query_result.scalars().first()
+        return instance
+    
     async def delete(self, uuid):
         async with asession.begin() as session:
             stmt = delete(self.model).where(self.model.uuid==uuid)
@@ -74,7 +83,7 @@ class CarouselAPI(CRUDManager):
     async def get_list(self):
         return await super().list()
     
-    @router.post("/carousel-item/", tags=["carousel"], response_model=CarouselItemBase)
+    @router.post("/carousel-item/", tags=["carousel"], response_model=CarouselItemFull)
     async def create_item(self, item: create_update_schema):
         return await super().create(item)
     
@@ -97,6 +106,36 @@ class CarouselAPI(CRUDManager):
     @router.delete("/carousel-item/{uuid}/", tags=["carousel"])
     async def delete_item(self, uuid):
         return await super().delete(uuid)
+
+@cbv(router)
+class SettingsAPI(CRUDManager):
+    model = Settings
+    create_update_schema = SettingBase
+
+    @router.get("/settings/", tags=["settings"], response_model=List[SettingFull])
+    async def get_list(self):
+        return await super().list()
+    
+    @router.post("/settings/", tags=["settings"], response_model=SettingFull)
+    async def create_item(self, item: create_update_schema):
+        return await super().create(item)
+    
+    @router.get("/settings/{uuid}/", tags=["settings"], response_model=SettingFull)
+    async def get(self, uuid):
+        return await super().get(uuid)
+    
+    @router.get("/settings/get_by_name/{name}", tags=["settings"], response_model=SettingFull)
+    async def get_by_name(self, name):
+        async with asession.begin() as session:
+            stmt = select(self.model).where(self.model.name==name)
+            query_result = await session.execute(stmt)
+            instance = query_result.scalars().first()
+        return instance
+    
+    @router.delete("/csettings/{uuid}/", tags=["settings"])
+    async def delete_item(self, uuid):
+        return await super().delete(uuid)
+    
 
 # @app.get("/secret/")
 # def get_secret(request: Request):

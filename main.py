@@ -1,5 +1,7 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+
 from stock import views
 from fastapi.openapi.docs import (
     get_redoc_html,
@@ -13,6 +15,7 @@ from os import getenv
 DEBUG = getenv("DEBUG", True)
 LOGGER_NAME = getenv("LOGGER_NAME", "schema_editor")
 LOG_LEVEL = getenv("LOG_LEVEL", "DEBUG" if DEBUG else "ERROR")
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
 
 LOGGING = {
     "version": 1,
@@ -63,6 +66,10 @@ async def redoc_html():
     )
 
 
-@app.on_event("startup")
-async def on_startup():
-    logging.config.dictConfig(LOGGING)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGIN_WHITELIST,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

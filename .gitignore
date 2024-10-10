@@ -1,5 +1,6 @@
 /.venv
 /.vscode
 /__pycache__
-/static/carousel-images
+/static/carousel-images/*
 /stock/__pycache__
+/*/*/__pycache__
