@@ -6,13 +6,15 @@ from stock.exceptions import Unauthorized
 import logging
 import aiofiles
 
-from stock.models import CarouselItem, Settings
+from stock.models import CarouselItem, Settings, Products
 from stock.database import asession, engine
 from stock.schemas import (
     CarouselItemBase,
     CarouselItemFull,
     SettingBase,
     SettingFull,
+    ProductsBase,
+    ProductsFull
 )
 from sqlalchemy import select, update, delete
 
@@ -136,6 +138,43 @@ class SettingsAPI(CRUDManager):
     async def delete_item(self, uuid):
         return await super().delete(uuid)
     
+@cbv(router)
+class ProductsAPI(CRUDManager):
+    model = Products
+    create_update_schema = ProductsBase
+
+    @router.get("/products/", tags=["products"], response_model=List[ProductsBase])
+    async def get_products(self):
+        return await super().list()
+    
+    @router.post('/products/', tags=["products"], response_model=ProductsFull)
+    async def create_products(self, item: create_update_schema):
+        return await super().create(item)
+
+    @router.put("product/{uuid}/add-product-images/", tags=["products"]) # response_model=ProductsBase
+    async def put_product_images(self, uuid, files: List[UploadFile]):
+        result = []
+        for file in files:
+            async with aiofiles.open(f"static/products-images/{file.filename}", 'wb+') as out_file:
+                content = await file.read() 
+                await out_file.write(content)
+
+            result.append(f"http://localhost:8000/static/products-images/{file.filename}")
+
+        async with asession.begin() as session:
+            stmt = (update(self.model)
+                    .where(self.model.uuid==uuid)
+                    .values(attachments=result))
+            await session.execute(stmt)
+            stmt = select(self.model).where(self.model.uuid==uuid)
+            query_result = await session.execute(stmt)
+            response = query_result.scalars().first()
+
+        return response
+    
+    @router.delete("/product/{uuid}/", tags=["products"])
+    async def delete_product(self, uuid):
+        return super().delete(uuid)
 
 # @app.get("/secret/")
 # def get_secret(request: Request):

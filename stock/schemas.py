@@ -22,3 +22,16 @@ class SettingFull(SettingBase):
 
     class Config:
         orm_mode = True
+
+class ProductsBase(BaseModel):
+    name: str
+    description: str
+    attachments: list | None = None
+    properties: dict | None = None
+    price: float
+
+class ProductsFull(ProductsBase):
+    uuid: UUID4
+
+    class Config:
+        orm_mode = True
