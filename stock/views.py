@@ -159,7 +159,7 @@ class ProductsAPI(CRUDManager):
                 content = await file.read() 
                 await out_file.write(content)
 
-            result.append(f"http://localhost:8000/static/products-images/{file.filename}")
+            result.append(f"http://{SERVER_HOST}/static/products-images/{file.filename}")
 
         async with asession.begin() as session:
             stmt = (update(self.model)
