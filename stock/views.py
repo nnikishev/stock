@@ -143,7 +143,7 @@ class ProductsAPI(CRUDManager):
     model = Products
     create_update_schema = ProductsBase
 
-    @router.get("/products/", tags=["products"], response_model=List[ProductsBase])
+    @router.get("/products/", tags=["products"], response_model=List[ProductsFull])
     async def get_products(self):
         return await super().list()
     
