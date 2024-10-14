@@ -17,7 +17,7 @@ from stock.schemas import (
     ProductsFull
 )
 from sqlalchemy import select, update, delete
-
+from env import SERVER_HOST
 
 import jwt
 
@@ -98,7 +98,7 @@ class CarouselAPI(CRUDManager):
         async with asession.begin() as session:
             stmt = (update(self.model)
                     .where(self.model.uuid==uuid)
-                    .values(image=f"http://localhost:8000/static/carousel-images/{file.filename}"))
+                    .values(image=f"http://{SERVER_HOST}:8000/static/carousel-images/{file.filename}"))
             await session.execute(stmt)
             stmt = select(self.model).where(self.model.uuid==uuid)
             query_result = await session.execute(stmt)
