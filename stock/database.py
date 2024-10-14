@@ -12,4 +12,3 @@ asession = async_sessionmaker(autocommit=False, autoflush=False, bind=engine, ex
 
 Base = declarative_base()
 
-
