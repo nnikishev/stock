@@ -134,7 +134,7 @@ class SettingsAPI(CRUDManager):
             instance = query_result.scalars().first()
         return instance
     
-    @router.delete("/csettings/{uuid}/", tags=["settings"])
+    @router.delete("/settings/{uuid}/", tags=["settings"])
     async def delete_item(self, uuid):
         return await super().delete(uuid)
     
@@ -151,12 +151,12 @@ class ProductsAPI(CRUDManager):
     async def create_products(self, item: create_update_schema):
         return await super().create(item)
 
-    @router.get("product/{uuid}/", tags=["products"]) 
+    @router.get("/product/{uuid}/", tags=["products"]) 
     async def get(self, uuid):
         return await super().get(uuid)
     
 
-    @router.put("product/{uuid}/add-product-images/", tags=["products"]) # response_model=ProductsBase
+    @router.put("/product/{uuid}/add-product-images/", tags=["products"]) # response_model=ProductsBase
     async def put_product_images(self, uuid, files: List[UploadFile]):
         result = []
         for file in files:
