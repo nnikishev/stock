@@ -1,20 +1,25 @@
 from fastapi import Depends, Request, APIRouter, UploadFile
 from fastapi_utils.cbv import cbv
 from typing import List
+from uuid import uuid4
 
 from stock.exceptions import Unauthorized
 import logging
 import aiofiles
 
-from stock.models import CarouselItem, Settings, Products
+from stock.models import (CarouselItem, Settings, Products, Tag,
+    association_table)
 from stock.database import asession, engine
+from sqlalchemy.orm import selectinload
 from stock.schemas import (
     CarouselItemBase,
     CarouselItemFull,
     SettingBase,
     SettingFull,
     ProductsBase,
-    ProductsFull
+    ProductsFull,
+    TagCreate,
+    TagFull
 )
 from sqlalchemy import select, update, delete
 from env import SERVER_HOST
@@ -48,7 +53,7 @@ class CRUDManager:
             try:
                 stmt = select(self.model)
                 query_result = await session.execute(stmt)
-                result = query_result.scalars().all()
+                result = query_result.unique().scalars().all()
             except Exception as err:
                 logger.error(err)
         return result
@@ -177,9 +182,47 @@ class ProductsAPI(CRUDManager):
 
         return response
     
+    @router.put("/product/{uuid}/set-tag/{tag_uuid}", tags=["products"])
+    async def set_tag(self, uuid, tag_uuid):
+        async with asession.begin() as session:
+            product = await session.execute(
+                select(self.model).where(self.model.uuid == uuid)
+            )
+            await session.execute(association_table.insert().values(
+                uuid=uuid4(), product_uuid=uuid, tag_uuid=tag_uuid))
+            await session.flush()
+            await session.commit()
+        return product.scalars().first()
+
+    
     @router.delete("/product/{uuid}/", tags=["products"])
     async def delete_product(self, uuid):
         return await super().delete(uuid)
+
+
+@cbv(router)
+class TagAPI(CRUDManager):
+
+    model = Tag
+    create_update_schema = TagCreate
+
+    @router.get("/tags/", tags=["tags"], response_model=List[TagFull])
+    async def get_products(self):
+        return await super().list()
+    
+    @router.post('/tags/', tags=["tags"], response_model=TagFull)
+    async def create_products(self, item: create_update_schema):
+        return await super().create(item)
+
+    @router.get("/tags/{uuid}/", tags=["tags"], response_model=TagFull) 
+    async def get(self, uuid):
+        return await super().get(uuid)
+    
+    @router.delete("/tags/{uuid}/", tags=["tags"])
+    async def delete_product(self, uuid):
+        return await super().delete(uuid)
+    
+
 
 # @app.get("/secret/")
 # def get_secret(request: Request):

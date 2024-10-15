@@ -1,5 +1,13 @@
 from pydantic import BaseModel, UUID4
 
+class TagCreate(BaseModel):
+    title: str
+
+class TagFull(TagCreate):
+    uuid: UUID4
+
+    class Config:
+        orm_mode = True
 
 class CarouselItemBase(BaseModel):
     title: str
@@ -32,6 +40,7 @@ class ProductsBase(BaseModel):
 
 class ProductsFull(ProductsBase):
     uuid: UUID4
+    tags: list[TagFull] | None = None
 
     class Config:
         orm_mode = True
