@@ -179,7 +179,7 @@ class ProductsAPI(CRUDManager):
     
     @router.delete("/product/{uuid}/", tags=["products"])
     async def delete_product(self, uuid):
-        return super().delete(uuid)
+        return await super().delete(uuid)
 
 # @app.get("/secret/")
 # def get_secret(request: Request):
