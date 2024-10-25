@@ -57,7 +57,7 @@ class Products(Base):
     properties = Column(JSON, nullable=True)
     price = Column(Float)
     tags: Mapped[List["Tag"]] = relationship(
-        secondary=association_table, back_populates="products", lazy="joined"
+        secondary=association_table, back_populates="products", lazy="subquery"
     )
 
 
@@ -68,5 +68,5 @@ class Tag(Base):
     uuid: Mapped[UUID4] = mapped_column(primary_key=True, default=uuid4)
     title = Column(String)
     products:  Mapped[List["Products"]] = relationship(
-        secondary=association_table, back_populates="tags", lazy="joined"
+        secondary=association_table, back_populates="tags", lazy="subquery"
     )
