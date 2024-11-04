@@ -8,7 +8,7 @@ from sqlalchemy import (
     String, 
     JSON, 
     Float, 
-    Table
+    Table,
 )
 from uuid import uuid4
 from sqlalchemy.orm import (
@@ -24,8 +24,8 @@ association_table = Table(
     "product_tag",
     Base.metadata,
     Column("uuid", UUID, primary_key=True, default=uuid4),
-    Column("tag_uuid", ForeignKey("tag.uuid")),
-    Column("product_uuid", ForeignKey("products.uuid")),
+    Column("tag_uuid", ForeignKey("tag.uuid", ondelete="CASCADE")),
+    Column("product_uuid", ForeignKey("products.uuid", ondelete="CASCADE")),
 )
 
 class CarouselItem(Base):
