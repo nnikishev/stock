@@ -164,8 +164,8 @@ class ProductsAPI(CRUDManager):
     @router.put("/product/{uuid}/add-product-images/", tags=["products"]) # response_model=ProductsBase
     async def put_product_images(self, uuid, files: List[UploadFile]):
         result = []
-        filename = f"{uuid4()}-{file.filename}"
         for file in files:
+            filename = f"{uuid4()}-{file.filename}"
             async with aiofiles.open(f"static/products-images/{filename}", 'wb+') as out_file:
                 content = await file.read() 
                 await out_file.write(content)
