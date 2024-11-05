@@ -8,7 +8,7 @@ import logging
 import aiofiles
 
 from stock.models import (CarouselItem, Settings, Products, Tag,
-    association_table)
+    association_table, Feedback)
 from stock.database import asession, engine
 from sqlalchemy.orm import selectinload
 from stock.schemas import (
@@ -19,7 +19,9 @@ from stock.schemas import (
     ProductsBase,
     ProductsFull,
     TagCreate,
-    TagFull
+    TagFull,
+    FeedbackCreate,
+    FeedbackFull
 )
 from sqlalchemy import select, update, delete
 from env import SERVER_HOST
@@ -152,7 +154,7 @@ class ProductsAPI(CRUDManager):
     async def get_products(self):
         return await super().list()
     
-    @router.post('/products/', tags=["products"], response_model=ProductsFull)
+    @router.post('/products/', tags=["products"], response_model=ProductsBase)
     async def create_products(self, item: create_update_schema):
         return await super().create(item)
 
@@ -223,7 +225,27 @@ class TagAPI(CRUDManager):
     async def delete_product(self, uuid):
         return await super().delete(uuid)
     
+@cbv(router)
+class FeedbackAPI(CRUDManager):
+    model = Feedback
+    create_update_schema = FeedbackCreate
 
+    @router.get("/feedbacks/", tags=["feedbacks"], response_model=List[FeedbackFull])
+    async def get_products(self):
+        return await super().list()
+    
+    @router.post('/feedbacks/', tags=["feedbacks"], response_model=FeedbackFull)
+    async def create_products(self, item: create_update_schema):
+        return await super().create(item)
+
+    @router.get("/feedbacks/{uuid}/", tags=["feedbacks"], response_model=FeedbackFull) 
+    async def get(self, uuid):
+        return await super().get(uuid)
+    
+    @router.delete("/feedbacks/{uuid}/", tags=["feedbacks"])
+    async def delete_product(self, uuid):
+        return await super().delete(uuid)
+    
 
 # @app.get("/secret/")
 # def get_secret(request: Request):

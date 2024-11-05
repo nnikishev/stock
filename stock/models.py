@@ -4,11 +4,12 @@ from sqlalchemy import (
     Boolean, 
     Column, 
     UUID, 
-    Integer, 
+    func, 
     String, 
     JSON, 
     Float, 
     Table,
+    DateTime
 )
 from uuid import uuid4
 from sqlalchemy.orm import (
@@ -70,3 +71,15 @@ class Tag(Base):
     products:  Mapped[List["Products"]] = relationship(
         secondary=association_table, back_populates="tags", lazy="subquery"
     )
+
+
+class Feedback(Base):
+
+    __tablename__ = "feedbacks"
+
+    uuid = Column(UUID, primary_key=True, default=uuid4)
+    fio = Column(String)
+    email = Column(String)
+    phone = Column(String)
+    message = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
