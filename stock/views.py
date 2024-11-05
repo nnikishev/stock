@@ -246,7 +246,7 @@ class FeedbackAPI(CRUDManager):
     async def delete_product(self, uuid):
         return await super().delete(uuid)
     
-    @router.delete("/feedbacks/drop-all/", tags=["feedbacks"])
+    @router.delete("/drop-all-feedbacks/", tags=["feedbacks"])
     async def delete_all(self):
         async with asession.begin() as session:
             stmt = delete(self.model)
